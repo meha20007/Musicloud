@@ -1,0 +1,34 @@
+# MusicLoud Backend — Deployment on Render
+# ============================================================
+# HOW TO USE:
+#  1. Push the backend folder to GitHub.
+#  2. Connect the repo to Render.com (free account is fine).
+#  3. Set all environment variables in the Render dashboard.
+# ============================================================
+
+services:
+  - type: web
+    name: musicloud-backend
+    runtime: java
+    plan: free
+    buildCommand: cd musicloud-backend/musicloud-backend && ./mvnw clean package -DskipTests
+    startCommand: java -jar musicloud-backend/musicloud-backend/target/musicloud-backend-1.0.0.jar
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: SPRING_DATASOURCE_URL
+        sync: false   # Set this in Render dashboard — do NOT put the real value here
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_JWT_SECRET
+        sync: false
+      - key: JPA_DDL_AUTO
+        value: update

@@ -1,0 +1,39 @@
+# MusicLoud - Git Ignore Rules
+# =============================
+
+# --- Secrets (NEVER commit these!) ---
+.env
+*.env
+*.env.local
+
+# --- Maven Build Output ---
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# --- IDE Files ---
+.idea/
+*.iml
+.vscode/settings.json
+nbproject/private/
+*.class
+
+# --- Swing Build Output ---
+build/classes/
+*.jar
+!djnativeswing*.jar
+!djnativeswing-swt*.jar
+!miglayout*.jar
+!org.eclipse.swt*.jar
+!TimingFramework*.jar
+
+# --- Logs ---
+*.log
+logs/
+
+# --- OS Files ---
+.DS_Store
+Thumbs.db
+
+# --- Backup ---
+backup_pre_modifications/
+*.backup
