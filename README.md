@@ -4,6 +4,7 @@ MusicLoud is a cloud-based music library management system that allows users to 
 
 ## 🌐 Live Links
 - Website LINK : https://musicloud-1.onrender.com
+Username: admin Password :admin(default)
 
 ## ✨ Features
 - User registration and login
