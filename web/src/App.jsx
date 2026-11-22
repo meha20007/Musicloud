@@ -12,7 +12,7 @@ import {
   Search,
   UserRound,
 } from "lucide-react";
-import { api, readSession, saveSession, SESSION_KEY } from "./api.js";
+import { api, readSession, saveSession, SESSION_KEY, wakeBackend } from "./api.js";
 
 const genres = ["All", "Pop", "Rock", "Hip-Hop", "Love", "Classical", "Jazz", "Electronic"];
 
@@ -23,6 +23,10 @@ function displayError(error) {
 function App() {
   const [session, setSession] = useState(readSession);
   const [authNotice, setAuthNotice] = useState("");
+
+  useEffect(() => {
+    wakeBackend();
+  }, []);
 
   useEffect(() => {
     const expire = () => {

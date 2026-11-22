@@ -1,0 +1,16 @@
+name: Keep MusicLoud backend alive
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wake backend
+        run: |
+          curl --fail --silent --show-error --retry 5 --retry-delay 10 \
+            --max-time 60 \
+            https://musicloud-allz.onrender.com/api/health

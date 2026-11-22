@@ -30,7 +30,39 @@ function formatDetails(details) {
     .join(" ");
 }
 
-export async function api(path, { method = "GET", body, auth = true, signal } = {}) {
+export async function api(path, {
+  method = "GET",
+  body,
+  auth = true,
+  signal,
+  timeoutMs = 30_000,
+  retries = 2,
+} = {}) {
+  let lastError;
+
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    try {
+      return await apiOnce(path, { method, body, auth, signal, timeoutMs });
+    } catch (error) {
+      lastError = error;
+      if (
+        signal?.aborted ||
+        error?.status === 401 ||
+        error?.status === 403 ||
+        error?.status === 404 ||
+        error?.status >= 400 ||
+        attempt === retries
+      ) {
+        throw error;
+      }
+      await new Promise((resolve) => window.setTimeout(resolve, 2_000 * (attempt + 1)));
+    }
+  }
+
+  throw lastError;
+}
+
+async function apiOnce(path, { method, body, auth, signal, timeoutMs }) {
   const token = auth ? getStoredToken() : null;
   const headers = { Accept: "application/json" };
 
@@ -38,19 +70,36 @@ export async function api(path, { method = "GET", body, auth = true, signal } = 
   if (token) headers.Authorization = `Bearer ${token}`;
 
   let response;
+  const controller = new AbortController();
+  const abortFromCaller = () => controller.abort();
+  if (signal) {
+    if (signal.aborted) controller.abort();
+    else signal.addEventListener("abort", abortFromCaller, { once: true });
+  }
+  const timeoutId = window.setTimeout(() => controller.abort("timeout"), timeoutMs);
   try {
     response = await fetch(`${API_BASE_URL}${path}`, {
       method,
       headers,
       body: body === undefined ? undefined : JSON.stringify(body),
-      signal,
+      signal: controller.signal,
     });
   } catch (error) {
+    if (signal?.aborted) throw error;
+    if (controller.signal.aborted) {
+      throw new ApiError(
+        "MusicLoud's server is still starting or unavailable. Please wait a moment and try again.",
+        0,
+      );
+    }
     if (error.name === "AbortError") throw error;
     throw new ApiError(
       "Could not reach MusicLoud. Check your connection and try again.",
       0,
     );
+  } finally {
+    window.clearTimeout(timeoutId);
+    signal?.removeEventListener("abort", abortFromCaller);
   }
 
   const text = await response.text();
@@ -119,5 +168,17 @@ export function readSession() {
   } catch {
     sessionStorage.removeItem(SESSION_KEY);
     return null;
+  }
+}
+
+export async function wakeBackend() {
+  try {
+    await api("/api/health", {
+      auth: false,
+      timeoutMs: 20_000,
+      retries: 5,
+    });
+  } catch {
+    // Auth submission will report the full error when the user tries to continue.
   }
 }

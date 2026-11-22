@@ -11,6 +11,7 @@ services:
     name: musicloud-backend
     runtime: java
     plan: free
+    healthCheckPath: /api/health
     buildCommand: cd musicloud-backend/musicloud-backend && ./mvnw clean package -DskipTests
     startCommand: java -jar musicloud-backend/musicloud-backend/target/musicloud-backend-1.0.0.jar
     envVars:
